@@ -1,5 +1,8 @@
 export class CreateWalletDto {
-  readonly name: string;
-  readonly initialInvestment: number;
-  readonly currency: string;
+  walletID: number;
+  initialInvestment: number;
+  currency: string;
+  profit: number;
+  loss: number;
+  roi: number;
 }

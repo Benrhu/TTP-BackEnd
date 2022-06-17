@@ -5,6 +5,9 @@ export type WalletDocument = Wallet & Document;
 
 @Schema()
 export class Wallet {
+  @Prop({ unique: true, required: true })
+  walletId: number;
+
   @Prop({ required: true })
   initialInvestment: number;
 
@@ -13,6 +16,9 @@ export class Wallet {
 
   @Prop({ required: true })
   profit: number;
+
+  @Prop({ required: true })
+  loss: number;
 
   @Prop({ required: true })
   roi: number;
