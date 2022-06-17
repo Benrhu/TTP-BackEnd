@@ -1,0 +1,9 @@
+export interface IUser {
+  name: string;
+  surname: string;
+  email: string;
+  password: string;
+  location: string;
+  phone: number;
+  money: string[];
+}
