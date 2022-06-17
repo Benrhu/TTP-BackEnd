@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import mongoose from 'mongoose';
-import { moneyEntity } from 'src/money/entities/money.entity';
-import { IMoney } from 'src/money/money.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+// import { moneyEntity } from 'src/wallet/entities/money.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { userEntity } from './entities/user.entity';
-import { IUser } from './user.interface';
+import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
+
+  async createUser(createUserDto: CreateUserDto) {
+    const createdUser = new this.userModel(createUserDto);
+    return createdUser.save();
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAllUsers(): Promise<User[]> {
+    const user = await this.userModel.find().exec();
+    return user;
   }
 
   findOne(id: number) {
@@ -29,33 +32,7 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  getInititalInvestment(id: number) {
-    try{
-        let userModel = userEntity();
-        let moneyModel = moneyEntity();
-
-        let moneyFound: IMoney[] = [];
-
-        let response: any = {
-          money: [],
-        };
-
-        await userModel.findById(id).then(async (user: IUser) => {
-          response.user = user.name;
-
-          let objectId:mongoose.Types.ObjectId[] = [];
-          user.money.forEach(async (money) => {
-              let moneyId = new mongoose.Types.ObjectId(money);
-              objectId.push(moneyId);
-          });
-
-          await moneyModel.find({ _id: moneyId }).then(async (money: IMoney[]) => {
-              moneyFound = money;
-          });
-
-      }).catch((error) => {
-          console.log(`DATABASE ERROR => Obtaining user: ${error}`);
-      })
-
-      response.money = moneyFound:
-      return response;
+  getInititalInvestment(initialInvestment: number) {
+    return initialInvestment;
+  }
+}
