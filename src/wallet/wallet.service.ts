@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateWalletDto } from './dto/create-wallet.dto';
-import { UpdateMWalletDto } from './dto/update-wallet.dto';
+import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { Wallet, WalletDocument } from './schema/wallet.schema';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class WalletService {
     return wallet;
   }
 
-  async getWallet(walletID: Wallet): Promise<string> {
+  async getWallet(walletID): Promise<Wallet> {
     const wallet = await this.walletModel.findById(walletID);
     return wallet;
   }
@@ -28,7 +28,7 @@ export class WalletService {
 
   async updateWallet(
     walletID,
-    updateWalletDto: UpdateMWalletDto,
+    updateWalletDto: UpdateWalletDto,
   ): Promise<Wallet> {
     const updatedWallet = await this.walletModel.findByIdAndUpdate(
       walletID,
