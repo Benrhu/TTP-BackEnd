@@ -8,7 +8,7 @@ import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async createUser(createUserDto: CreateUserDto) {
     const createdUser = new this.userModel(createUserDto);
@@ -20,16 +20,23 @@ export class UsersService {
     return user;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async getUser(userId): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateUser(userId, updateUserDto: UpdateUserDto): Promise<User> {
+    const updatedWallet = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateUserDto,
+      { new: true },
+    );
+    return updatedWallet;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async deleteWallet(userId) {
+    const deleteWallet = await this.userModel.findByIdAndRemove(userId);
+    return deleteWallet;
   }
 
   getInititalInvestment(initialInvestment: number) {
