@@ -4,63 +4,41 @@ import {
   Post,
   Body,
   Param,
-  Delete,
-  Res,
-  HttpStatus,
-  NotFoundException,
   Put,
-  Query,
+  Delete,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { ValidateObjectId } from 'src/shared/pipes/validate-object-id-pipes';
-import { Response } from 'express';
-import { Wallet } from './schema/wallet.schema';
+import { Wallet } from './models/wallet.interface';
 
 @Controller('wallet')
 export class WalletController {
   constructor(private walletService: WalletService) {}
 
   @Get('wallets')
-  async getWallets(@Res() response: Response) {
-    const wallets = await this.walletService.getAllMoney();
-    return response.status(HttpStatus.OK).json(wallets);
+  public getWallets(): Array<Wallet> {
+    return this.walletService.getAllMoney();
   }
 
-  /*   @Get('wallet/:walletId')
-  async getWallet(
-    @Res() res,
-    @Param('walletId', new ValidateObjectId()) walletId: number,
-  ){
-    const wallet = await this.walletService.getWallet(walletId);
-    if (!wallet) throw new NotFoundException(`Wallet doesn't exists`);
-    return res.status(HttpStatus.OK).json(wallet); 
-  } */
+  @Get(':walletId')
+  public getWallet(@Param('walletId') walletId: number): Wallet {
+    return this.walletService.getWallet(walletId);
+  }
 
   @Post('/wallet')
-  async createWallet(@Res() response: Response, @Body() wallet: Wallet) {
-    const newWallet = await this.walletService.createWallet(wallet);
-    return response.status(HttpStatus.OK).json({
-      message: 'Wallet has been created successfully!',
-      post: newWallet,
-    });
+  public createWallet(@Body() wallet: Wallet): Wallet {
+    return this.walletService.createWallet(wallet);
   }
 
-  @Put('/update')
-  async updateWallet(
-    @Res() response: Response,
-    @Query('walletID', new ValidateObjectId()) walletID,
+  @Put(':walletId')
+  public walletUpdate(
+    @Param('walletId') walletId: number,
     @Body() wallet: Wallet,
-  ) {
-    const updatedWallet = await this.walletService.updateWallet(wallet);
-    if (!updatedWallet) throw new NotFoundException(`Wallet doesn't exists`);
-    return response.status(HttpStatus.OK).json({
-      message: 'Wallet has been successfully updated',
-      post: updatedWallet,
-    });
+  ): Wallet {
+    return this.walletService.updateWallet(walletId, wallet);
   }
 
-  @Delete('wallet/:walletId')
-  remove(@Param('walletId') walletId: string) {
-    return this.walletService.deleteWallet(+walletId);
+  @Delete(':walletId')
+  public walletDelete(@Param('walletId') walletId: number): void {
+    this.walletService.deleteWallet(walletId);
   }
 }
