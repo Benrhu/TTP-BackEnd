@@ -1,44 +1,85 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { Wallet } from 'src/wallet/models/wallet.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './schema/user.schema';
+import { User } from './models/user.interface';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  private users: Array<User> = [];
 
-  async createUser(createUserDto: CreateUserDto) {
-    const createdUser = new this.userModel(createUserDto);
-    return createdUser.save();
-  }
-
-  async findAllUsers(): Promise<User[]> {
-    const user = await this.userModel.find().exec();
-    return user;
-  }
-
-  async getUser(userId): Promise<User> {
-    const user = await this.userModel.findById(userId).exec();
-    return user;
-  }
-
-  async updateUser(userId, updateUserDto: UpdateUserDto): Promise<User> {
-    const updatedWallet = await this.userModel.findByIdAndUpdate(
-      userId,
-      updateUserDto,
-      { new: true },
+  public createUser(user: User) {
+    const userIdExists: boolean = this.users.some(
+      (item) => item.userId === user.userId,
     );
-    return updatedWallet;
+
+    if (userIdExists) {
+      throw new UnprocessableEntityException('User already exists');
+    }
+    const maxId: number = Math.max(...this.users.map((user) => user.userId), 0);
+    const userId = maxId + 1;
+
+    const newUser: User = {
+      ...user,
+      userId,
+    };
+
+    this.users.push(newUser);
+
+    return newUser;
   }
 
-  async deleteWallet(userId) {
-    const deleteWallet = await this.userModel.findByIdAndRemove(userId);
-    return deleteWallet;
+  public getAllsers(): Array<User> {
+    return this.users;
   }
 
-  getInititalInvestment(initialInvestment: number) {
-    return initialInvestment;
+  public getUser(userId: number): User {
+    const user: User = this.users.find((user) => user.userId === userId);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    return user;
+  }
+
+  public updateWallet(userId: number, user: User): User {
+    console.log(`Updating user with id: ${userId}`);
+    const index: number = this.users.findIndex(
+      (item) => item.userId === userId,
+    );
+
+    if (index === -1) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const userIdExists: boolean = this.users.some(
+      (item) => item.userId === user.userId,
+    );
+
+    if (userIdExists) {
+      throw new UnprocessableEntityException('User ID already exists');
+    }
+
+    const updateUser: User = {
+      ...user,
+      userId,
+    };
+
+    this.users[index] = updateUser;
+
+    return updateUser;
+  }
+
+  public deleteUser(userId: number): void {
+    const index: number = this.users.findIndex(
+      (user) => user.userId === userId,
+    );
+    if (index === -1) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    this.users.splice(index, 1);
   }
 }
