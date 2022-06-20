@@ -22,19 +22,19 @@ export class UsersController {
   userService: any;
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/wallet')
+  @Post('/user')
   async createUser(@Res() res: Response, @Body() createUserDto: CreateUserDto) {
     const newUser = await this.userService.createUser(createUserDto);
     return res.status(HttpStatus.OK).json({
-      message: 'Wallet has been created successfully!',
+      message: 'User has been created successfully!',
       post: newUser,
     });
   }
 
   @Get('users')
   async getUsers(@Res() res: Response) {
-    const wallets = await this.userService.getAllUser();
-    return res.status(HttpStatus.OK).json(wallets);
+    const users = await this.userService.getAllUser();
+    return res.status(HttpStatus.OK).json(users);
   }
 
   @Get('user/:userId')
@@ -42,22 +42,22 @@ export class UsersController {
     @Res() res: Response,
     @Param('userId', new ValidateObjectId()) userId,
   ) {
-    const wallet = await this.userService.getUser(userId);
-    if (!wallet) throw new NotFoundException(`Wallet doesn't exists`);
-    return res.status(HttpStatus.OK).json(wallet);
+    const user = await this.userService.getUser(userId);
+    if (!user) throw new NotFoundException(`User doesn't exists`);
+    return res.status(HttpStatus.OK).json(user);
   }
 
   @Put('/update')
-  async updateWallet(
+  async updateUser(
     @Res() res: Response,
-    @Query('walletID', new ValidateObjectId()) userId,
+    @Query('userId', new ValidateObjectId()) userId,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     const updatedUser = await this.userService.updateUser(
       userId,
       updateUserDto,
     );
-    if (!updatedUser) throw new NotFoundException(`Wallet doesn't exists`);
+    if (!updatedUser) throw new NotFoundException(`User doesn't exists`);
     return res.status(HttpStatus.OK).json({
       message: 'User has been successfully updated',
       post: updatedUser,
