@@ -12,11 +12,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { CreateWalletDto } from './dto/create-wallet.dto';
-import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { ValidateObjectId } from 'src/shared/pipes/validate-object-id-pipes';
 import { Response } from 'express';
-import { WalletSchema } from './schema/wallet.schema';
+import { Wallet } from './schema/wallet.schema';
 
 @Controller('wallet')
 export class WalletController {
@@ -28,22 +26,19 @@ export class WalletController {
     return response.status(HttpStatus.OK).json(wallets);
   }
 
-  @Get('wallet/:walletId')
-  async findAll(
-    @Res() response: Response,
-    @Param(WalletSchema., new ValidateObjectId()) walletId,
-  ) {
-    const wallet = await this.walletService.getWallet(walletID);
+  /*   @Get('wallet/:walletId')
+  async getWallet(
+    @Res() res,
+    @Param('walletId', new ValidateObjectId()) walletId: number,
+  ){
+    const wallet = await this.walletService.getWallet(walletId);
     if (!wallet) throw new NotFoundException(`Wallet doesn't exists`);
-    return response.status(HttpStatus.OK).json(wallet);
-  }
+    return res.status(HttpStatus.OK).json(wallet); 
+  } */
 
   @Post('/wallet')
-  async createWallet(
-    @Res() response: Response,
-    @Body() createWalletDto: CreateWalletDto,
-  ) {
-    const newWallet = await this.walletService.createWallet(createWalletDto);
+  async createWallet(@Res() response: Response, @Body() wallet: Wallet) {
+    const newWallet = await this.walletService.createWallet(wallet);
     return response.status(HttpStatus.OK).json({
       message: 'Wallet has been created successfully!',
       post: newWallet,
@@ -54,12 +49,9 @@ export class WalletController {
   async updateWallet(
     @Res() response: Response,
     @Query('walletID', new ValidateObjectId()) walletID,
-    @Body() updateWalletDto: UpdateWalletDto,
+    @Body() wallet: Wallet,
   ) {
-    const updatedWallet = await this.walletService.updateWallet(
-      walletID,
-      updateWalletDto,
-    );
+    const updatedWallet = await this.walletService.updateWallet(wallet);
     if (!updatedWallet) throw new NotFoundException(`Wallet doesn't exists`);
     return response.status(HttpStatus.OK).json({
       message: 'Wallet has been successfully updated',
@@ -67,8 +59,8 @@ export class WalletController {
     });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.walletService.deleteWallet(+id);
+  @Delete('wallet/:walletId')
+  remove(@Param('walletId') walletId: string) {
+    return this.walletService.deleteWallet(+walletId);
   }
 }

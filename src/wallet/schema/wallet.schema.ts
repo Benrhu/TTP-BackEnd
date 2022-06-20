@@ -1,27 +1,19 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import * as mongoose from 'mongoose';
 
-export type WalletDocument = Wallet & Document;
+export const WalletSchema = new mongoose.Schema({
+  walletId: { type: Number, required: true },
+  initialInvestment: { type: Number, required: true },
+  currency: { type: Number, required: true },
+  profit: { type: Number, required: false },
+  loss: { type: Number, required: false },
+  roi: { type: Number, required: false },
+});
 
-@Schema()
-export class Wallet {
-  @Prop({ unique: true, required: true })
+export interface Wallet {
   walletId: number;
-
-  @Prop({ required: true })
   initialInvestment: number;
-
-  @Prop({ required: true })
-  currency: string;
-
-  @Prop({ required: true })
+  currency: number;
   profit: number;
-
-  @Prop({ required: true })
   loss: number;
-
-  @Prop({ required: true })
   roi: number;
 }
-
-export const WalletSchema = SchemaFactory.createForClass(Wallet);
