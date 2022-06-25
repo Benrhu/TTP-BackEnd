@@ -1,4 +1,4 @@
-export interface User {
+export interface IUser {
   singUpDate?: Date;
   userId?: number;
   username: string;

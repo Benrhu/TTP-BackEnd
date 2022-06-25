@@ -3,41 +3,55 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Wallet } from 'src/wallet/models/wallet.interface';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './models/user.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { IUser } from './models/user.interface';
 
 @Injectable()
 export class UsersService {
-  private users: Array<User> = [];
+  private users: IUser[] = [];
 
-  public createUser(user: User) {
+  constructor(@InjectModel('User') private readonly userModel: Model<IUser>) {}
+
+  public createUser(
+    singUpDate: Date,
+    userId: number,
+    username: string,
+    name: string,
+    surname: string,
+    location: string,
+    phone: number,
+  ) {
+    const newUser = new this.userModel({
+      singUpDate: singUpDate,
+      userId: userId,
+      username: username,
+      name: name,
+      surname: surname,
+      location: location,
+      phone: phone,
+    });
+
     const userIdExists: boolean = this.users.some(
-      (item) => item.userId === user.userId,
+      (item) => item.userId === userId,
     );
 
     if (userIdExists) {
       throw new UnprocessableEntityException('User already exists');
     }
+
     const maxId: number = Math.max(...this.users.map((user) => user.userId), 0);
-    const userId = maxId + 1;
-
-    const newUser: User = {
-      ...user,
-      userId,
-    };
-
-    this.users.push(newUser);
+    userId = maxId + 1;
 
     return newUser;
   }
 
-  public getAllsers(): Array<User> {
+  public getAllsers(): IUser[] {
     return this.users;
   }
 
-  public getUser(userId: number): User {
-    const user: User = this.users.find((user) => user.userId === userId);
+  public getUser(userId: number): IUser {
+    const user: IUser = this.users.find((user) => user.userId === userId);
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -45,7 +59,7 @@ export class UsersService {
     return user;
   }
 
-  public updateWallet(userId: number, user: User): User {
+  public updateWallet(userId: number, user: IUser): IUser {
     console.log(`Updating user with id: ${userId}`);
     const index: number = this.users.findIndex(
       (item) => item.userId === userId,
@@ -63,7 +77,7 @@ export class UsersService {
       throw new UnprocessableEntityException('User ID already exists');
     }
 
-    const updateUser: User = {
+    const updateUser: IUser = {
       ...user,
       userId,
     };
