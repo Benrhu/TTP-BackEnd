@@ -1,7 +1,7 @@
-export class Wallet {
+export interface IWallet {
   walletId?: number;
   initialInvestment: number;
-  currency: number;
+  currency: string;
   profit: number;
   loss: number;
   roi: number;

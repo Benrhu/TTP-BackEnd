@@ -1,18 +1,28 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { Wallet } from './models/wallet.interface';
+import { forwardRef, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UsersService } from 'src/users/users.service';
+import { IWallet } from './models/wallet.interface';
 
 @Injectable()
 export class WalletService {
-  private wallets: Array<Wallet> = [];
+  private wallets: IWallet[] = [];
 
-  public getAllMoney(): Array<Wallet> {
-    return this.wallets;
+  constructor(
+    @InjectModel('Wallet') private readonly walletModel: Model<IWallet>,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+  ) {}
+
+  async getAllMoney() {
+    const wallets = this.walletModel.find().exec();
+    return wallets as unknown as IWallet[];
   }
 
-  public getWallet(walletId: number): Wallet {
-    const wallet: Wallet = this.wallets.find(wallet => wallet.walletId === walletId);
+  public getWallet(walletId: number): IWallet {
+    const wallet: IWallet = this.wallets.find(wallet => wallet.walletId === walletId);
 
     if (!wallet) {
       throw new NotFoundException(`Wallet with ID ${walletId} not found`);
@@ -20,26 +30,28 @@ export class WalletService {
     return wallet;
   }
 
-  public createWallet(wallet: Wallet): Wallet {
-    const walletIdExists: boolean = this.wallets.some((item) => item.walletId === wallet.walletId);
+  async createWallet(walletId: number, currency: string) {
+
+    const maxId: number = Math.max(...this.wallets.map((wallet) => wallet.walletId), 0);
+
+    const newWallet = new this.walletModel({
+      walletId: maxId + 1,
+      currency: currency
+    });
+
+    const walletIdExists: boolean = this.wallets.some((item) => item.walletId === walletId);
     
     if (walletIdExists) {
       throw new UnprocessableEntityException('Wallet ID already exists');
     }
-    const maxId: number = Math.max(...this.wallets.map((wallet) => wallet.walletId), 0);
-    const walletId = maxId + 1;
 
-    const newWallet: Wallet = {
-      ...wallet,
-      walletId,
-    };
 
-    this.wallets.push(newWallet);
+    const result = await newWallet.save();
 
     return newWallet;
   }
 
-  public updateWallet(walletId: number, wallet: Wallet): Wallet {
+  public updateWallet(walletId: number, wallet: IWallet): IWallet {
     console.log('Updating wallet with id: ${walletId}');
     const index: number = this.wallets.findIndex((item) => item.walletId === walletId);
     
@@ -53,7 +65,7 @@ export class WalletService {
       throw new UnprocessableEntityException('Wallet ID already exists');
     }
 
-    const updateWallet: Wallet = {
+    const updateWallet: IWallet = {
       ...wallet,
       walletId,
     };

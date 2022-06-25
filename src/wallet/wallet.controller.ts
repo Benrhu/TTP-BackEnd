@@ -8,32 +8,36 @@ import {
   Delete,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { Wallet } from './models/wallet.interface';
+import { IWallet } from './models/wallet.interface';
 
 @Controller('wallet')
 export class WalletController {
   constructor(private walletService: WalletService) {}
 
   @Get('wallets')
-  public getWallets(): Array<Wallet> {
+  public getWallets() {
     return this.walletService.getAllMoney();
   }
 
   @Get(':walletId')
-  public getWallet(@Param('walletId') walletId: number): Wallet {
+  async getWallet(@Param('walletId') walletId: number) {
     return this.walletService.getWallet(walletId);
   }
 
   @Post('/wallet')
-  public createWallet(@Body() wallet: Wallet): Wallet {
-    return this.walletService.createWallet(wallet);
+  async createWallet(
+    @Body('currency') currency: string,
+    @Param('walletId') walletId: number,
+  ) {
+    const newWallet = await this.walletService.createWallet(walletId, currency);
+    return newWallet;
   }
 
   @Put(':walletId')
   public walletUpdate(
     @Param('walletId') walletId: number,
-    @Body() wallet: Wallet,
-  ): Wallet {
+    @Body() wallet: IWallet,
+  ): IWallet {
     return this.walletService.updateWallet(walletId, wallet);
   }
 
